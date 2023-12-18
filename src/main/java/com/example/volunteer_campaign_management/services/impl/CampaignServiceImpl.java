@@ -132,7 +132,7 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
-    public ResponseEntity<Object> updateCampaign(int idCampagin, String name, Timestamp startDate, Timestamp endDate, String desc, String title, String location, MultipartFile image, int currentStatus) {
+    public ResponseEntity<Object> updateCampaign(int idCampagin, String name, Timestamp startDate, Timestamp endDate, String desc, String title, String location, MultipartFile image, boolean status, int currentStatus) {
         try {
             CurrentStatusEntity currentStatusEntity = currentStatusRepository.findByIdCurrent(currentStatus);
             CampaignEntity campaignEntity = campaignRepository.findByIdCom(idCampagin);
@@ -142,6 +142,7 @@ public class CampaignServiceImpl implements CampaignService {
             campaignEntity.setDescription(desc);
             campaignEntity.setTitle(title);
             campaignEntity.setLocation(location);
+            campaignEntity.setStatus(status);
             campaignEntity.setImage(cloudinaryService.uploadImage(image));
             campaignEntity.setStatusIssueEntity(currentStatusEntity);
             campaignRepository.save(campaignEntity);

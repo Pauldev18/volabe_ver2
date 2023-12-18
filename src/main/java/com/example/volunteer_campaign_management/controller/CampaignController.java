@@ -59,11 +59,12 @@ public class CampaignController {
                                                  @RequestParam("title") String title,
                                                  @RequestParam("location") String location,
                                                  @RequestParam("newImage") MultipartFile image,
+                                                 @RequestParam("status") Boolean status,
                                                  @RequestParam("currentStatus") int currentStatus) {
          try {
              Timestamp startDate = convertStringToTimestamp(start_date);
              Timestamp endDate = convertStringToTimestamp(end_date);
-             return campaignService.updateCampaign(campaignId,name, startDate, endDate, desc, title, location, image, currentStatus);
+             return campaignService.updateCampaign(campaignId,name, startDate, endDate, desc, title, location, image, status, currentStatus);
          } catch (ParseException e) {
              e.printStackTrace();
              return null;

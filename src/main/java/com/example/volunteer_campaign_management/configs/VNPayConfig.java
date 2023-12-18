@@ -15,8 +15,8 @@ import java.util.*;
 public class VNPayConfig {
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     public static String vnp_ReturnUrl = "http://localhost:8080/checkPay2";
-    public static  String urlSuccess = "http://localhost:3000/trian";
-    public static String urlFail = "http://localhost:3000/notfound";
+    public static  String urlSuccess = "http://localhost:3001/trian";
+    public static String urlFail = "http://localhost:3001/notfound";
     public static String vnp_TmnCode = "AKHWRJTK";
     public static String secretKey = "IGPCKQUTCTEZIPJNRGPCYDWSOFEYZVJE";
     public static String vnp_ApiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";

@@ -1,17 +1,26 @@
 package com.example.volunteer_campaign_management.controller;
 
+
 import com.example.volunteer_campaign_management.configs.VNPayConfig;
+import com.example.volunteer_campaign_management.dtos.VNPayDTO;
 import com.example.volunteer_campaign_management.entities.ContributionsEntity;
+import com.example.volunteer_campaign_management.jwts.JwtUtils;
 import com.example.volunteer_campaign_management.repositories.ContributionsRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -23,64 +32,17 @@ import java.util.*;
 @RestController
 @CrossOrigin
 public class VNPayController {
-    private static final String SECRET_KEY1 = "donatechotao1234"; // Now it's 16 bytes
-    private static final String random = generateRandomKey();
-
-    private static String generateRandomKey() {
-        byte[] key = new byte[16]; // 16 bytes for AES-128, change this to 24 or 32 for AES-192 or AES-256
-        new SecureRandom().nextBytes(key);
-        return Base64.getEncoder().encodeToString(key);
-    }
 
     @Autowired
     private ContributionsRepository repository;
-    private String encrypt(String value) {
-        try {
-            byte[] keyBytes = SECRET_KEY1.getBytes(StandardCharsets.UTF_8);
-            SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
-            Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
-            byte[] encrypted = cipher.doFinal(value.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(encrypted);
-        } catch (Exception e) {
-            // Handle encryption exception
-            e.printStackTrace();
-            return null; // or throw a custom exception if needed
-        }
-    }
 
-
-
-    private String decrypt(String encryptedValue) {
-        try {
-            byte[] keyBytes = SECRET_KEY1.getBytes(StandardCharsets.UTF_8);
-            SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
-            Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
-            byte[] decrypted = cipher.doFinal(Base64.getDecoder().decode(encryptedValue));
-            return new String(decrypted, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            // Handle decryption exception
-            e.printStackTrace();
-            return null; // or throw a custom exception if needed
-        }
-    }
-
-
-    @GetMapping("/test")
-    public String test(@RequestParam("test") String test){
-        return decrypt(test);
-    }
-
-    @GetMapping("/pay")
-    public String getPay(@RequestParam("price") long price,
-                         @RequestParam("name") String name,
-                         @RequestParam("description") String description) throws UnsupportedEncodingException {
+    @PutMapping("/pay")
+    public String getPay(@RequestBody VNPayDTO vnPayDTO) throws UnsupportedEncodingException {
 
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String orderType = "other";
-        long amount = price * 100;
+        long amount = (vnPayDTO.getPrice()) * 100;
         String bankCode = "NCB";
         String vnp_TxnRef = VNPayConfig.getRandomNumber(8);
         String vnp_IpAddr = "127.0.0.1";
@@ -97,10 +59,10 @@ public class VNPayController {
         vnp_Params.put("vnp_OrderType", orderType);
         vnp_Params.put("vnp_Locale", "vn");
 
-        String encodedName = URLEncoder.encode(name, StandardCharsets.UTF_8.toString());
-        String encodedDescription = URLEncoder.encode(description, StandardCharsets.UTF_8.toString());
-        String maHoaToken = encrypt(random);
-        vnp_Params.put("vnp_ReturnUrl", VNPayConfig.vnp_ReturnUrl + "?name=" + encodedName + "&description=" + encodedDescription + "&detoken=" + maHoaToken);
+        String encodedName = URLEncoder.encode(vnPayDTO.getName(), StandardCharsets.UTF_8.toString());
+        String encodedDescription = URLEncoder.encode(vnPayDTO.getDescription(), StandardCharsets.UTF_8.toString());
+
+        vnp_Params.put("vnp_ReturnUrl", VNPayConfig.vnp_ReturnUrl + "?name=" + encodedName + "&description=" + encodedDescription);
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -148,12 +110,10 @@ public class VNPayController {
             @RequestParam("vnp_ResponseCode") String responseCode,
             @RequestParam("description") String encodedDescription,
             @RequestParam("name") String encodedName,
-            @RequestParam("vnp_Amount") String amount,
-            @RequestParam("detoken") String detoken
+            @RequestParam("vnp_Amount") String amount
+
     ) {
         try {
-            String decryptedToken = decrypt(detoken);
-            if (random.equals(decryptedToken)) {
 
                 String decodedName = URLDecoder.decode(encodedName, StandardCharsets.UTF_8.toString());
                 String decodedDescription = URLDecoder.decode(encodedDescription, StandardCharsets.UTF_8.toString());
@@ -180,21 +140,16 @@ public class VNPayController {
                         newObj.setName(decodedName);
                     }
 
-                    newObj.setPrice(Float.parseFloat(amount));
+                    newObj.setPrice(Float.parseFloat(amount) / 100.0f);
                     repository.save(newObj);
-
-
-
                     return new RedirectView(VNPayConfig.urlSuccess);
                 } else {
                     // Xử lý thanh toán thất bại
                     return new RedirectView(VNPayConfig.urlFail);
                 }
-            } else {
-                // Token không hợp lệ
-                return new RedirectView(VNPayConfig.urlFail);
-            }
-        } catch (UnsupportedEncodingException e) {
+
+        }catch (UnsupportedEncodingException e) {
+            System.out.println(e.getMessage());
             return new RedirectView(VNPayConfig.urlFail);
         }
     }

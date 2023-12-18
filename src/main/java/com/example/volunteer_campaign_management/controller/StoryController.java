@@ -35,26 +35,26 @@ public class StoryController {
     }
 
 
-//    @PutMapping("/updateStory/{id}")
-//    public ResponseEntity<Object> updateStory(@PathVariable(value = "id") int id,
-//                                              @RequestParam("name") String name,
-//                                              @RequestParam("content") String content,
-//                                              @RequestParam("title") String title,
-//                                              @RequestParam("created_at")String created_at,
-//                                              @RequestParam("image")MultipartFile image,
-//                                              @RequestParam("campaginID") int campaginID) {
-//        try {
-//            Timestamp startAt = convertStringToTimestamp(created_at);
-//            return storyService.updateNew(id, name, content, title, image, startAt, campaginID);
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
     @PutMapping("/updateStory/{id}")
-    public StoryDTO updateStory(@PathVariable(value = "id") @Valid int storyID, @RequestBody StoryDTO StoryDTO) {
-        return storyService.updateStory(storyID,StoryDTO);
+    public ResponseEntity<Object> updateStory(@PathVariable(value = "id") int id,
+                                              @RequestParam("name") String name,
+                                              @RequestParam("content") String content,
+                                              @RequestParam("title") String title,
+                                              @RequestParam("created_at")String created_at,
+                                              @RequestParam("image")MultipartFile image,
+                                              @RequestParam("campaginID") int campaginID) {
+        try {
+            Timestamp startAt = convertStringToTimestamp(created_at);
+            return storyService.updateNew(id, name, content, title, image, startAt, campaginID);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
+//    @PutMapping("/updateStory/{id}")
+//    public StoryDTO updateStory(@PathVariable(value = "id") @Valid int storyID, @RequestBody StoryDTO StoryDTO) {
+//        return storyService.updateStory(storyID,StoryDTO);
+//    }
 
 
     @GetMapping("/story/{id}")

@@ -1,6 +1,7 @@
 package com.example.volunteer_campaign_management.services;
 
 import com.example.volunteer_campaign_management.dtos.DonorDTO;
+import com.example.volunteer_campaign_management.entities.DonorEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,4 +17,5 @@ public interface DonorService {
     List<DonorDTO> searchDonor(Optional<String> query);
 
     DonorDTO getDonorById(int donorID);
+    List<DonorDTO> searchByName(String name);
 }

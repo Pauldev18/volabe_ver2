@@ -23,6 +23,6 @@ public interface CampaignService {
 
   CampaignDTO updateCampaign(int storyID, CampaignDTO campaignDTO);
 
-  ResponseEntity<Object> updateCampaign(int idCampagin,String name, Timestamp startDate, Timestamp endDate, String desc, String title, String location, MultipartFile image, int currentStatus);
+  ResponseEntity<Object> updateCampaign(int idCampagin,String name, Timestamp startDate, Timestamp endDate, String desc, String title, String location, MultipartFile image, boolean status, int currentStatus);
 
 }

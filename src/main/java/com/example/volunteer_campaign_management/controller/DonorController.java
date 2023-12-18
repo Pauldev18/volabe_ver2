@@ -47,4 +47,9 @@ public class DonorController {
     public List<DonorDTO> searchDonor(@PathVariable(value = "query") Optional<String> query){
         return donorService.searchDonor(query);
     }
+    @GetMapping("/searchDonor")
+    public List<DonorDTO> searchByname(@RequestParam("name") String name)
+    {
+        return donorService.searchByName(name);
+    }
 }

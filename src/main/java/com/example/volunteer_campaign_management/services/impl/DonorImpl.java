@@ -28,7 +28,7 @@ public class DonorImpl implements DonorService {
     @Override
     public List<DonorDTO> getAllDonor() {
         try{
-        List<DonorEntity> donorEntities = donorRepository.findAll();
+        List<DonorEntity> donorEntities = donorRepository.findAllSort();
             List<DonorDTO> donorDTOS = new ArrayList<>();
             donorEntities.stream().forEach(donorEntity -> {
                 DonorDTO donorDTO = new DonorDTO(donorEntity.getDonorId(),
@@ -97,6 +97,26 @@ public class DonorImpl implements DonorService {
         }
         return null;
     }
+
+    @Override
+    public List<DonorDTO> searchByName(String name) {
+        try{
+            List<DonorEntity> donorEntities = donorRepository.searchByName(name);
+            List<DonorDTO> donorDTOS = new ArrayList<>();
+            donorEntities.stream().forEach(donorEntity -> {
+                DonorDTO donorDTO = new DonorDTO(donorEntity.getDonorId(),
+                        donorEntity.getName(), donorEntity.getAmount(),
+                        donorEntity.getDonate_date(), donorEntity.getDescription(),donorEntity.getCampaignEntity().getCampaignId(), donorEntity.getCampaignEntity().getName());
+
+                donorDTOS.add(donorDTO);
+            });
+            return donorDTOS;
+        } catch (Exception e) {
+            e.getMessage();
+        }
+        return null;
+    }
+
     @Override
     public boolean deleteDonor(int donorID) {
 

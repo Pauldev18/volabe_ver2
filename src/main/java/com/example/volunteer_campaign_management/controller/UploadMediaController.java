@@ -70,6 +70,7 @@ public class UploadMediaController {
         return new ResponseEntity<>(MediaDTO, HttpStatus.OK);
     }
 
+
     @PutMapping("/editMedia/{idMedia}")
     public ResponseEntity<Object> editMedia(@PathVariable int idMedia,
                                             @RequestParam(value = "newImage", required = false) MultipartFile newImage,
